@@ -1,110 +1,111 @@
-# Blog Project - Backend
+# Blog com Posts e Comentários
 
-Backend do blog desenvolvido com Spring Boot 3, Java 17 e MongoDB.
+Sistema completo de blog desenvolvido com arquitetura full-stack moderna.
 
-## 🚀 Tecnologias
+## 🏗️ Arquitetura
 
-- **Java 17**
-- **Spring Boot 3.2.2**
-- **Spring Data MongoDB**
-- **Spring Validation**
-- **Lombok**
-- **Maven**
+### Stack Tecnológica
 
-## 📁 Estrutura
+**Frontend:**
+- Next.js 14+ (App Router)
+- TypeScript
+- Tailwind CSS
+- Zod (validação)
+
+**Backend:**
+- Java 17
+- Spring Boot 3.2.2
+- Spring Data MongoDB
+- Lombok
+
+**Banco de Dados:**
+- MongoDB
+
+## 📂 Estrutura do Projeto
 
 ```
-backend/
-└── src/main/java/com/blog/
-    ├── BlogApplication.java      # Main class
-    ├── config/                   # Configurações
-    │   └── CorsConfig.java      # Configuração CORS
-    ├── controller/              # REST Controllers
-    │   ├── PostController.java
-    │   └── CommentController.java
-    ├── service/                 # Lógica de negócio
-    │   ├── PostService.java
-    │   └── CommentService.java
-    ├── repository/              # Acesso a dados
-    │   ├── PostRepository.java
-    │   └── CommentRepository.java
-    ├── model/                   # Entidades MongoDB
-    │   ├── Post.java
-    │   └── Comment.java
-    ├── dto/                     # Data Transfer Objects
-    │   ├── request/
-    │   │   ├── CreatePostRequest.java
-    │   │   ├── UpdatePostRequest.java
-    │   │   └── CreateCommentRequest.java
-    │   └── response/
-    │       ├── PostResponse.java
-    │       └── CommentResponse.java
-    ├── exception/               # Exceções
-    │   ├── ResourceNotFoundException.java
-    │   ├── DuplicateResourceException.java
-    │   ├── ErrorResponse.java
-    │   └── GlobalExceptionHandler.java
-    └── util/                    # Utilitários
-        └── SlugUtil.java
+blog-project/
+├── frontend/              # Aplicação Next.js
+│   ├── app/              # App Router do Next.js
+│   │   ├── posts/        # Páginas de posts
+│   │   ├── api/          # API routes (opcional)
+│   │   ├── layout.tsx    # Layout principal
+│   │   ├── page.tsx      # Página inicial
+│   │   └── globals.css   # Estilos globais
+│   ├── components/       # Componentes React
+│   │   ├── posts/        # Componentes de posts
+│   │   └── comments/     # Componentes de comentários
+│   ├── lib/             # Bibliotecas e utilitários
+│   │   ├── api/         # Chamadas à API
+│   │   ├── types/       # TypeScript types
+│   │   ├── utils/       # Funções utilitárias
+│   │   └── validations/ # Schemas de validação
+│   └── public/          # Arquivos estáticos
+│
+├── backend/             # Aplicação Spring Boot
+│   ├── src/main/java/com/blog/
+│   │   ├── controller/  # REST Controllers
+│   │   ├── service/     # Lógica de negócio
+│   │   ├── repository/  # Acesso a dados (MongoDB)
+│   │   ├── model/       # Entidades/Documentos
+│   │   ├── dto/         # Data Transfer Objects
+│   │   │   ├── request/ # DTOs de requisição
+│   │   │   └── response/# DTOs de resposta
+│   │   ├── exception/   # Exceções customizadas
+│   │   ├── config/      # Configurações
+│   │   └── util/        # Utilitários
+│   └── src/main/resources/
+│       └── application.properties
+│
+└── docs/               # Documentação
 ```
 
-## 🛠️ Instalação
+## 🗄️ Modelo de Dados
 
-### Pré-requisitos
-- Java 17+
-- Maven 3.6+
-- MongoDB 6.0+
+### Coleção: Posts
 
-### Configurar MongoDB
-
-```bash
-# macOS (Homebrew)
-brew services start mongodb-community
-
-# Docker
-docker run -d -p 27017:27017 --name mongodb mongo:latest
+```javascript
+{
+  _id: ObjectId,
+  title: String,        // min: 3, max: 200
+  content: String,      // min: 10
+  author: String,       // min: 2, max: 100
+  slug: String,         // único, indexado
+  createdAt: DateTime,
+  updatedAt: DateTime
+}
 ```
 
-### Build do Projeto
+**Índices:**
+- `slug` (unique)
+- `createdAt` (para ordenação)
 
-```bash
-mvn clean install
+### Coleção: Comments
+
+```javascript
+{
+  _id: ObjectId,
+  postId: String,       // referência ao Post
+  author: String,       // min: 2, max: 100
+  content: String,      // min: 1, max: 1000
+  createdAt: DateTime
+}
 ```
 
-## 🏃 Executar
+**Índices:**
+- `postId` (para busca por post)
+- `createdAt` (para ordenação)
 
-```bash
-mvn spring-boot:run
-```
-
-A API estará disponível em: http://localhost:8080
-
-## ⚙️ Configuração
-
-Edite `src/main/resources/application.properties`:
-
-```properties
-# MongoDB
-spring.data.mongodb.uri=mongodb://localhost:27017/blog
-spring.data.mongodb.database=blog
-
-# Server
-server.port=8080
-
-# CORS
-cors.allowed.origins=http://localhost:3000
-```
-
-## 🔌 Endpoints da API
+## 🔌 API Endpoints
 
 ### Posts
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/api/posts` | Lista posts (paginado) |
+| GET | `/api/posts` | Lista todos os posts (paginado) |
 | GET | `/api/posts/{id}` | Busca post por ID |
 | GET | `/api/posts/slug/{slug}` | Busca post por slug |
-| POST | `/api/posts` | Cria post |
+| POST | `/api/posts` | Cria novo post |
 | PUT | `/api/posts/{id}` | Atualiza post |
 | DELETE | `/api/posts/{id}` | Deleta post |
 
@@ -112,99 +113,106 @@ cors.allowed.origins=http://localhost:3000
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/api/posts/{postId}/comments` | Lista comentários |
-| POST | `/api/posts/{postId}/comments` | Cria comentário |
+| GET | `/api/posts/{postId}/comments` | Lista comentários de um post |
+| POST | `/api/posts/{postId}/comments` | Cria novo comentário |
 | DELETE | `/api/posts/{postId}/comments/{commentId}` | Deleta comentário |
 
-## 📊 Modelo de Dados
+## 🚀 Como Executar
 
-### Post
-```java
-{
-  id: String,
-  title: String,      // 3-200 chars
-  content: String,    // min 10 chars
-  author: String,     // 2-100 chars
-  slug: String,       // único
-  createdAt: DateTime,
-  updatedAt: DateTime
-}
+### Pré-requisitos
+
+- Node.js 18+
+- Java 17+
+- Maven 3.6+
+- MongoDB 6.0+
+
+### 1. Configurar MongoDB
+
+```bash
+# Iniciar MongoDB (macOS com Homebrew)
+brew services start mongodb-community
+
+# Ou com Docker
+docker run -d -p 27017:27017 --name mongodb mongo:latest
 ```
 
-### Comment
-```java
-{
-  id: String,
-  postId: String,     // referência ao post
-  author: String,     // 2-100 chars
-  content: String,    // 1-1000 chars
-  createdAt: DateTime
-}
+### 2. Executar Backend
+
+```bash
+cd backend
+mvn spring-boot:run
 ```
 
-## 🔧 Funcionalidades
+O backend estará disponível em `http://localhost:8080`
 
-### PostService
-- CRUD completo de posts
-- Geração automática de slug único
-- Contagem de comentários
-- Paginação e ordenação
+### 3. Executar Frontend
 
-### CommentService
-- CRUD de comentários
-- Validação de post existente
-- Ordenação por data
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### Exception Handling
-- Tratamento global com @RestControllerAdvice
-- Exceções customizadas
-- Respostas de erro padronizadas
-- Validação de Bean Validation
+O frontend estará disponível em `http://localhost:3000`
 
-## 🏗️ Design Patterns
+## 📋 Funcionalidades
 
+### Posts
+- ✅ Listar posts com paginação
+- ✅ Visualizar post individual
+- ✅ Criar novo post
+- ✅ Editar post existente
+- ✅ Deletar post
+- ✅ Geração automática de slug único
+- ✅ Contagem de comentários por post
+
+### Comentários
+- ✅ Listar comentários de um post
+- ✅ Adicionar comentário a um post
+- ✅ Deletar comentário
+- ✅ Ordenação por data (mais recentes primeiro)
+
+### Validações
+- ✅ Validação frontend com Zod
+- ✅ Validação backend com Bean Validation
+- ✅ Tratamento de erros global
+- ✅ Mensagens de erro personalizadas
+
+## 🎨 Design Patterns Utilizados
+
+### Backend
 - **Repository Pattern**: Acesso a dados
-- **Service Layer**: Lógica de negócio
-- **DTO Pattern**: Separação de concerns
-- **Builder Pattern**: Construção de objetos (Lombok)
+- **Service Layer**: Lógica de negócio separada
+- **DTO Pattern**: Separação entre entidades e dados de transferência
+- **Exception Handling**: Tratamento centralizado com @RestControllerAdvice
 
-## 📦 Dependências Principais
-
-```xml
-<dependencies>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-mongodb</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-validation</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-    </dependency>
-</dependencies>
-```
+### Frontend
+- **Component-Based Architecture**: Componentes reutilizáveis
+- **Server Components**: Para SSR e melhor performance
+- **Client Components**: Para interatividade
+- **Custom Hooks**: Para lógica reutilizável (se necessário)
 
 ## 🔒 Segurança
 
-- CORS configurado
-- Validação em todas as camadas
-- Tratamento de exceções
+- CORS configurado para aceitar apenas origens permitidas
+- Validação de entrada em todas as camadas
+- Sanitização de dados
 - Proteção contra NoSQL injection
 
-## 🧪 Testar API
+## 📚 Próximas Melhorias
 
-Ver exemplos em: [docs/API_EXAMPLES.md](../docs/API_EXAMPLES.md)
+- [ ] Autenticação e autorização (JWT)
+- [ ] Sistema de likes/reactions
+- [ ] Upload de imagens
+- [ ] Editor de texto rico (Markdown/WYSIWYG)
+- [ ] Busca e filtros avançados
+- [ ] Tags/categorias para posts
+- [ ] Comentários aninhados (respostas)
+- [ ] Paginação no frontend
+- [ ] Testes unitários e de integração
+- [ ] Docker Compose para fácil deployment
+- [ ] CI/CD pipeline
 
-## 📝 Logs
+## 📝 Licença
 
-O projeto usa SLF4J com Logback para logging:
-- INFO: Operações principais
-- DEBUG: Detalhes de execução
-- ERROR: Erros e exceções
+MIT
